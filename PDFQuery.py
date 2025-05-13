@@ -12,12 +12,12 @@ loader = PyPDFLoader("the_lightning_thief.pdf")
 docs = loader.load_and_split()
 
 # Embed and store in vector DB
-embedding = OllamaEmbeddings()
+embedding = OllamaEmbeddings(model="nomic-embed-text")
 db = FAISS.from_documents(docs, embedding)
 
 # Create a retriever and a QA chain
-retriever = db.as_retriever()
-qa = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
+retriever = db.as_retriever(search_kwargs={"k": 20})
+qa = RetrievalQA.from_chain_type(llm=llm, retriever=retriever, chain_type="stuff")
 
 while True:
     # Get user input
