@@ -1,12 +1,11 @@
-from langchain_community.llms import Ollama
-from langchain.document_loaders import PyPDFLoader
-from langchain.embeddings import OllamaEmbeddings
-from langchain.vectorstores import FAISS
+from langchain_ollama import OllamaLLM, OllamaEmbeddings
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 
 # Load the LLM
-llm = Ollama(model="llama3.2")
+llm = OllamaLLM(model="llama3.2")
 
 # Load and split document
 loader = PyPDFLoader("the_lightning_thief.pdf")
@@ -35,5 +34,5 @@ while True:
         break
 
     # Get the answer from the QA chain
-    answer = qa.run(query)
-    print(f"Answer: {answer}")
+    result = qa.invoke(query)
+    print(f"Answer: {result['answer']}")

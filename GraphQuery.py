@@ -1,5 +1,4 @@
-from langchain_community.llms import Ollama
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_ollama import OllamaLLM, OllamaEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -26,7 +25,7 @@ def retrieve_documents(state):
     chat_history = state.get("chat_history", [])
     full_query = " ".join([q for q, _ in chat_history]) + " " + query
 
-    docs = retriever.get_relevant_documents(full_query.strip())
+    docs = retriever.invoke(full_query.strip())
     return {**state, "documents": docs}
 
 def generate_answer(state):
@@ -84,7 +83,7 @@ def main():
         db = setup_vectorstore()
 
     retriever = db.as_retriever(search_kwargs={"k": 20})
-    llm = Ollama(model="llama3.2")
+    llm = OllamaLLM(model="llama3.2")
     graph = build_graph()
 
     chat_history = []
