@@ -11,8 +11,16 @@ from typing import TypedDict, List, Tuple, Optional
 def setup_vectorstore(pdf_path="the_lightning_thief.pdf"):
     loader = PyPDFLoader(pdf_path)
     docs = loader.load()
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=200)
+    splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000,  # smaller for precision, not too small to lose context
+    chunk_overlap=200,
+    separators=["\n\n", "\n", ".", " ", ""]
+    )
     split_docs = splitter.split_documents(docs)
+
+    for i, doc in enumerate(split_docs):
+        doc.metadata["chunk_id"] = i
+        doc.metadata["source"] = "lightning_thief"
 
     embedding = OllamaEmbeddings(model="nomic-embed-text")
     db = FAISS.from_documents(split_docs, embedding)
@@ -34,12 +42,14 @@ def generate_answer(state):
     query = state["question"]
 
     context = "\n\n".join(doc.page_content for doc in docs)
-    prompt = f"""Answer the question using ONLY the context below.
+    prompt = f"""
+                 You are answering based ONLY on the following sources. Do not guess or make assumptions. It is better to say "I don't know" than to make something up.
 
-Context:
-{context}
+                 Context:
+                 {context}
 
-Question: {query}"""
+                 Question: {query}
+             """
 
     answer = llm.invoke(prompt)
     return {**state, "answer": answer}
