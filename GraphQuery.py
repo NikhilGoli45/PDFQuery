@@ -92,7 +92,7 @@ def main():
     except:
         db = setup_vectorstore()
 
-    retriever = db.as_retriever(search_kwargs={"k": 20})
+    retriever = db.as_retriever(search_kwargs={"k": 30})
     llm = OllamaLLM(model="llama3.2")
     graph = build_graph()
 
